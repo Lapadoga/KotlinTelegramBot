@@ -7,13 +7,12 @@ fun main() {
     val fileLines = file.readLines()
     fileLines.forEach {
         val lineParts = it.split("|")
-        val correctAnswers = try {
-            if (lineParts[2] == "") 0 else lineParts[2].toInt()
-        } catch (e: IndexOutOfBoundsException) {
-            0
-        }
 
-        val word = Word(original = lineParts[0], translate = lineParts[1], correctAnswers)
+        val word = Word(
+            original = lineParts[0],
+            translate = lineParts[1],
+            correctAnswersCount = lineParts.getOrNull(2)?.toIntOrNull() ?: 0
+        )
         listOfWords.add(word)
     }
 
