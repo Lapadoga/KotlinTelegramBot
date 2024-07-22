@@ -1,7 +1,41 @@
 import java.io.File
 
 fun main() {
-    val file = File("words.txt")
+    val listOfWord = parseFile("words.txt")
+
+    while (true) {
+        println(
+            """
+            Меню:
+            1 - Учить слова
+            2 - Статистика
+            0 - Выход
+        """.trimIndent()
+        )
+
+        val userAnswer = readln().toIntOrNull()
+        if (userAnswer == null || userAnswer !in 0..2) {
+            println("Введено неверное значение, повторите ввод")
+            continue
+        }
+
+        when (userAnswer) {
+            1 -> println("Учить слова")
+            2 -> {
+                val listOfLearnedWord = listOfWord.filter { it.correctAnswersCount >= 3 }
+                val percentString = String.format("%.0f", listOfLearnedWord.size.toFloat() / listOfWord.size * 100)
+                println(
+                    "Выучено ${listOfLearnedWord.size} из ${listOfWord.size} слов | ${percentString}%"
+                )
+            }
+
+            0 -> break
+        }
+    }
+}
+
+fun parseFile(path: String): MutableList<Word> {
+    val file = File(path)
     val listOfWords = mutableListOf<Word>()
 
     val fileLines = file.readLines()
@@ -15,8 +49,5 @@ fun main() {
         )
         listOfWords.add(word)
     }
-
-    listOfWords.forEach {
-        println(it)
-    }
+    return listOfWords
 }
