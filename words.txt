@@ -1,6 +1,6 @@
-hello|привет|2
-dog|собака|
-cat|кошка|3
-home|дом|5
-life|жизнь
-thank you|спасибо|1
+hello|привет|0
+dog|собака|0
+cat|кошка|0
+home|дом|0
+life|жизнь|0
+thank you|спасибо|0
