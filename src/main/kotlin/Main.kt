@@ -1,7 +1,6 @@
 import java.io.File
 
 const val MIN_CORRECT_ANSWERS = 3
-const val LAST_MENU_ELEMENT = 2
 const val TEST_WORDS_COUNT = 4
 
 fun main() {
@@ -18,11 +17,6 @@ fun main() {
         )
 
         val userAnswer = readln().toIntOrNull()
-        if (userAnswer == null || userAnswer !in 0..LAST_MENU_ELEMENT) {
-            println("Введено неверное значение, повторите ввод")
-            continue
-        }
-
         when (userAnswer) {
             1 -> {
                 val wordsLearned = startLearning(listOfWord)
@@ -34,6 +28,7 @@ fun main() {
 
             2 -> println(statisticsString(listOfWord))
             0 -> break
+            else -> println("Введено неверное значение, повторите ввод")
         }
     }
 }
@@ -80,14 +75,9 @@ fun startLearning(listOfWords: List<Word>): Boolean {
         println(testWord.original)
         testList = testList.shuffled()
         println(
-            """            
-            -----------------------
-            1. ${testList[0].translate}
-            2. ${testList.getOrNull(1)?.translate ?: "---"}
-            3. ${testList.getOrNull(2)?.translate ?: "---"}
-            4. ${testList.getOrNull(3)?.translate ?: "---"}
-            0. Меню
-        """.trimIndent()
+            testList.mapIndexed { index, word ->
+                "${index + 1}. ${word.translate}"
+            }.joinToString(separator = "\n", postfix = "\n0. Меню")
         )
 
         var userAnswer = readln().toIntOrNull()
