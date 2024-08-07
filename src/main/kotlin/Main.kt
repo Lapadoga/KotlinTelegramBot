@@ -1,7 +1,6 @@
 import java.io.File
 
 const val MIN_CORRECT_ANSWERS = 3
-const val LAST_MENU_ELEMENT = 2
 const val TEST_WORDS_COUNT = 4
 const val FILE_PATH = "words.txt"
 
@@ -19,10 +18,6 @@ fun main() {
         )
 
         val userAnswer = readln().toIntOrNull()
-        if (userAnswer == null || userAnswer !in 0..LAST_MENU_ELEMENT) {
-            println("Введено неверное значение, повторите ввод")
-            continue
-        }
 
         when (userAnswer) {
             1 -> {
@@ -35,6 +30,7 @@ fun main() {
 
             2 -> println(statisticsString(listOfWord))
             0 -> break
+            else -> println("Введено неверное значение, повторите ввод")
         }
     }
 }
@@ -68,7 +64,7 @@ fun statisticsString(listOfWord: List<Word>): String {
 
 fun startLearning(listOfWords: List<Word>): Boolean {
 
-    do {
+    while (true) {
 
         val listOfUnlearnedWords = listOfWords.filter { it.correctAnswersCount < MIN_CORRECT_ANSWERS }
         if (listOfUnlearnedWords.isEmpty())
@@ -81,35 +77,25 @@ fun startLearning(listOfWords: List<Word>): Boolean {
         println(testList[wordIndex].original)
 
         println(
-            """            
-            -----------------------
-            1. ${testList[0].translate}
-            2. ${testList.getOrNull(1)?.translate ?: "---"}
-            3. ${testList.getOrNull(2)?.translate ?: "---"}
-            4. ${testList.getOrNull(3)?.translate ?: "---"}
-            0. Меню
-        """.trimIndent()
+            testList.mapIndexed { index, word ->
+                "${index + 1}. ${word.translate}"
+            }.joinToString(separator = "\n", postfix = "\n0. Меню")
         )
 
-        var userAnswer = readln().toIntOrNull()
-        while (true) {
+        val userAnswer = readln().toIntOrNull()
 
-            if (userAnswer == null || userAnswer !in 0..TEST_WORDS_COUNT) {
-                println("Неверный ввод, повторите попытку")
-                userAnswer = readln().toIntOrNull()
-            } else
-                break
-        }
-
-        if (userAnswer != 0)
-            if (userAnswer!! - 1 == wordIndex) {
+        when (userAnswer) {
+            wordIndex + 1 -> {
                 println("Правильно!")
                 testList[wordIndex].correctAnswersCount++
                 saveDictionary(listOfWords)
-            } else
-                println("Неправильно - слово ${testList[wordIndex].translate}")
+            }
 
-    } while (userAnswer != 0)
+            !in 0..TEST_WORDS_COUNT -> println("Неверный ввод")
+            0 -> break
+            else -> println("Неправильно - слово ${testList[wordIndex].translate}")
+        }
+    }
 
     return false
 }
