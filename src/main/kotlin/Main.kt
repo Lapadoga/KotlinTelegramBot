@@ -109,6 +109,7 @@ fun saveDictionary(listOfWords: List<Word>) {
         val stringToWrite = "${it.original}|${it.translate}|${it.correctAnswersCount}\n"
         file.appendText(stringToWrite)
     }
+
 }
 
 
