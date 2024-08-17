@@ -1,11 +1,6 @@
-import java.io.File
-
-const val MIN_CORRECT_ANSWERS = 3
-const val TEST_WORDS_COUNT = 4
-const val FILE_PATH = "words.txt"
-
 fun main() {
-    val listOfWord = parseFile(FILE_PATH)
+
+    val trainer = LearnWordsTrainer()
 
     while (true) {
         println(
@@ -21,95 +16,46 @@ fun main() {
 
         when (userAnswer) {
             1 -> {
-                val wordsLearned = startLearning(listOfWord)
-                if (wordsLearned) {
-                    println("Вы выучили все слова")
-                    return
+                while (true) {
+                    val question = trainer.getNextQuestion()
+
+                    if (question == null) {
+                        println("Вы выучили все слова")
+                        break
+
+                    } else {
+                        println(question.asConsoleString())
+
+                        val userAnswerInput = readln().toIntOrNull()
+
+                        if (userAnswerInput == 0)
+                            break
+                        if (trainer.checkAnswer(userAnswerInput?.minus(1)))
+                            println("Правильно!")
+                        else
+                            println("Неправильно! ${question.correctAnswer.original} - это ${question.correctAnswer.translate}")
+
+                    }
                 }
             }
 
-            2 -> println(statisticsString(listOfWord))
+            2 -> {
+                val statistics = trainer.getStatistics()
+                println("Выучено ${statistics.learned} из ${statistics.total} слов | ${statistics.percent}%")
+            }
+
             0 -> break
             else -> println("Введено неверное значение, повторите ввод")
         }
     }
 }
 
-fun parseFile(path: String): List<Word> {
+fun Question.asConsoleString(): String {
 
-    val file = File(path)
-    val listOfWords = mutableListOf<Word>()
-
-    val fileLines = file.readLines()
-    fileLines.forEach {
-        val lineParts = it.split("|")
-
-        val word = Word(
-            original = lineParts[0],
-            translate = lineParts[1],
-            correctAnswersCount = lineParts.getOrNull(2)?.toIntOrNull() ?: 0
-        )
-        listOfWords.add(word)
-    }
-    return listOfWords
+    return this.variants.mapIndexed { index, word ->
+        "${index + 1}. ${word.translate}"
+    }.joinToString(separator = "\n", postfix = "\n0. Меню", prefix = this.correctAnswer.original + "\n")
 }
 
-fun statisticsString(listOfWord: List<Word>): String {
-
-    val listOfLearnedWord = listOfWord.filter { it.correctAnswersCount >= MIN_CORRECT_ANSWERS }
-    val percentString = String.format("%.0f", listOfLearnedWord.size.toFloat() / listOfWord.size * 100)
-
-    return "Выучено ${listOfLearnedWord.size} из ${listOfWord.size} слов | ${percentString}%"
-}
-
-fun startLearning(listOfWords: List<Word>): Boolean {
-
-    while (true) {
-
-        val listOfUnlearnedWords = listOfWords.filter { it.correctAnswersCount < MIN_CORRECT_ANSWERS }
-        if (listOfUnlearnedWords.isEmpty())
-            return true
-
-        val shuffledList = listOfUnlearnedWords.shuffled()
-        val testList = shuffledList.take(TEST_WORDS_COUNT)
-
-        val wordIndex = testList.indices.random()
-        println(testList[wordIndex].original)
-
-        println(
-            testList.mapIndexed { index, word ->
-                "${index + 1}. ${word.translate}"
-            }.joinToString(separator = "\n", postfix = "\n0. Меню")
-        )
-
-        val userAnswer = readln().toIntOrNull()
-
-        when (userAnswer) {
-            wordIndex + 1 -> {
-                println("Правильно!")
-                testList[wordIndex].correctAnswersCount++
-                saveDictionary(listOfWords)
-            }
-
-            !in 0..TEST_WORDS_COUNT -> println("Неверный ввод")
-            0 -> break
-            else -> println("Неправильно - слово ${testList[wordIndex].translate}")
-        }
-    }
-
-    return false
-}
-
-fun saveDictionary(listOfWords: List<Word>) {
-
-    val file = File(FILE_PATH)
-    file.writeText("")
-
-    listOfWords.forEach {
-        val stringToWrite = "${it.original}|${it.translate}|${it.correctAnswersCount}\n"
-        file.appendText(stringToWrite)
-    }
-
-}
 
 
