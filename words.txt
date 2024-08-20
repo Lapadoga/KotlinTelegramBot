@@ -1,6 +1,2 @@
-hello|привет|3
-dog|собака|3
-cat|кошка|3
-home|дом|3
-life|жизнь|1
-thank you|спасибо|1
+sadfsd
+sdfdxf

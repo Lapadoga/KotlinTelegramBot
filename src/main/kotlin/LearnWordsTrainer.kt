@@ -1,7 +1,5 @@
 import java.io.File
 
-const val MIN_CORRECT_ANSWERS = 3
-const val TEST_WORDS_COUNT = 4
 const val FILE_PATH = "words.txt"
 
 data class Statistics(
@@ -15,14 +13,14 @@ data class Question(
     val correctAnswer: Word,
 )
 
-class LearnWordsTrainer {
+class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val countOfQuestionWords: Int = 4) {
 
     private val dictionary = loadDictionary(FILE_PATH)
     private var question: Question? = null
 
     fun getStatistics(): Statistics {
 
-        val learned = dictionary.filter { it.correctAnswersCount >= MIN_CORRECT_ANSWERS }.size
+        val learned = dictionary.filter { it.correctAnswersCount >= learnedWordsCount }.size
         val total = dictionary.size
         val percent = learned * 100 / total
 
@@ -31,11 +29,14 @@ class LearnWordsTrainer {
 
     fun getNextQuestion(): Question? {
 
-        val listOfUnlearnedWords = dictionary.filter { it.correctAnswersCount < MIN_CORRECT_ANSWERS }
+        val listOfUnlearnedWords = dictionary.filter { it.correctAnswersCount < learnedWordsCount }.toMutableList()
         if (listOfUnlearnedWords.isEmpty()) return null
+        if (listOfUnlearnedWords.size < countOfQuestionWords) {
+            val learnedList = dictionary.filter { it.correctAnswersCount >= countOfQuestionWords }.shuffled()
+            listOfUnlearnedWords += learnedList.take(countOfQuestionWords - listOfUnlearnedWords.size)
+        }
 
-        val shuffledList = listOfUnlearnedWords.shuffled()
-        val testList = shuffledList.take(TEST_WORDS_COUNT)
+        val testList = listOfUnlearnedWords.shuffled().take(countOfQuestionWords)
 
         question = Question(
             testList,
