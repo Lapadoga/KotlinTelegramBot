@@ -11,12 +11,12 @@ fun main(args: Array<String>) {
 
     val client: HttpClient = HttpClient.newBuilder().build()
 
-    val request1: HttpRequest = HttpRequest.newBuilder().uri(URI(urlGetMe)).build()
-    val response1: HttpResponse<String> = client.send(request1, HttpResponse.BodyHandlers.ofString())
-    println(response1.body())
+    val botInformationRequest: HttpRequest = HttpRequest.newBuilder().uri(URI(urlGetMe)).build()
+    val botInformationResponse: HttpResponse<String> = client.send(botInformationRequest, HttpResponse.BodyHandlers.ofString())
+    println(botInformationResponse.body())
 
-    val request2: HttpRequest = HttpRequest.newBuilder().uri(URI(urlGetUpdates)).build()
-    val response2: HttpResponse<String> = client.send(request2, HttpResponse.BodyHandlers.ofString())
-    println(response2.body())
+    val botUpdatesRequest: HttpRequest = HttpRequest.newBuilder().uri(URI(urlGetUpdates)).build()
+    val botUpdatesResponse: HttpResponse<String> = client.send(botUpdatesRequest, HttpResponse.BodyHandlers.ofString())
+    println(botUpdatesResponse.body())
 
 }
