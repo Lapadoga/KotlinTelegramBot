@@ -21,11 +21,12 @@ fun main(args: Array<String>) {
         val text = telegramService.parseResponse(textMessageRegex, updates)
 
         if (chatIdString != null && text != null) {
-            val result = telegramService.sendMessage(chatIdString, text)
-            if (result)
-                println("Сообщение отправлено")
-            else
-                println("Ошибка отправки сообщения")
+            try {
+                telegramService.sendMessage(chatIdString, text)
+            } catch (e: Exception) {
+                println(e.message)
+            }
+
         }
     }
 
