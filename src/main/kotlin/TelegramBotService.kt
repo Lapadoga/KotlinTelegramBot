@@ -70,4 +70,30 @@ class TelegramBotService(botToken: String) {
         return result
     }
 
+    fun setCommands() {
+        val urlSendMessage = "${hostWithToken}setMyCommands"
+        val commandsBody = """
+            {
+            	"commands": [
+            			{
+            				"command": "/start",
+            				"description": "Запустить бота"
+            			}
+            		]
+            }
+        """.trimIndent()
+
+        val client = HttpClient.newBuilder().build()
+        val request = HttpRequest.newBuilder(URI(urlSendMessage))
+            .header("Content-type", "application/json")
+            .POST(BodyPublishers.ofString(commandsBody))
+            .build()
+        client.send(request, HttpResponse.BodyHandlers.ofString())
+    }
 }
+
+data class Word(
+    val original: String,
+    val translate: String,
+    var correctAnswersCount: Int = 0,
+)

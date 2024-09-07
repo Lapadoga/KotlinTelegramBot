@@ -3,11 +3,19 @@ fun main(args: Array<String>) {
     val botToken = args[0]
     var updateId = 0
     val telegramService = TelegramBotService(botToken)
+    val trainer = try {
+        LearnWordsTrainer()
+    } catch (e: Exception) {
+        println("Невозможно загрузить словарь")
+        null
+    }
 
     val dataRegex = "\"data\":\"(.+)\"".toRegex()
-    val textMessageRegex = "\"text\":\"(.+)\"".toRegex()
+    val textMessageRegex = "\"text\":\"(.+?)\"".toRegex()
     val chatIdRegex = "\"chat\":\\{\"id\":(\\d+)".toRegex()
     val messageIdRegex = "\"update_id\":(\\d+)".toRegex()
+
+    telegramService.setCommands()
 
     while (true) {
         Thread.sleep(2000)
@@ -23,7 +31,7 @@ fun main(args: Array<String>) {
         val data = telegramService.parseResponse(dataRegex, updates)
 
         if (chatIdString != null && text != null) {
-            if (text.equals("menu", ignoreCase = true))
+            if (text.equals("/start", ignoreCase = true))
                 try {
                     telegramService.sendMenu(chatIdString)
                 } catch (e: Exception) {
