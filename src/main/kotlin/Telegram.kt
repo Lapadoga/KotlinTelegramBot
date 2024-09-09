@@ -26,11 +26,11 @@ fun main(args: Array<String>) {
         if (updateIdString != null)
             updateId = updateIdString.toInt() + 1
 
-        val chatIdString = telegramService.parseResponse(chatIdRegex, updates)
+        val chatIdString = telegramService.parseResponse(chatIdRegex, updates) ?: continue
         val text = telegramService.parseResponse(textMessageRegex, updates)
         val data = telegramService.parseResponse(dataRegex, updates)
 
-        if (chatIdString != null && text != null) {
+        if (text != null) {
             if (text.equals("/start", ignoreCase = true))
                 try {
                     telegramService.sendMenu(chatIdString)
@@ -38,9 +38,9 @@ fun main(args: Array<String>) {
                     println(e.message)
                 }
         }
-        if (chatIdString != null && data != null) {
+        if (data != null) {
             when (data.lowercase()) {
-                "learn_words_clicked" -> {
+                LEARN_CLICKED -> {
                     try {
                         telegramService.sendMessage(chatIdString, "Изучение слов")
                     } catch (e: Exception) {
@@ -48,7 +48,7 @@ fun main(args: Array<String>) {
                     }
                 }
 
-                "statistics_clicked" -> {
+                STATISTICS_CLICKED -> {
                     try {
                         telegramService.sendMessage(chatIdString, "Выучено 10 из 10 слов | 100%")
                     } catch (e: Exception) {

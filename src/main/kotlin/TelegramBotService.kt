@@ -6,6 +6,8 @@ import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse
 
 const val HOST = "https://api.telegram.org/"
+const val STATISTICS_CLICKED = "statistics_clicked"
+const val LEARN_CLICKED = "learn_words_clicked"
 
 class TelegramBotService(botToken: String) {
 
@@ -41,13 +43,13 @@ class TelegramBotService(botToken: String) {
             			[
             				{
             					"text": "Изучить слова",
-            					"callback_data": "learn_words_clicked"
+            					"callback_data": "$LEARN_CLICKED"
             				}
             			],
             			[
             				{
             					"text": "Статистика",
-            					"callback_data": "statistics_clicked"
+            					"callback_data": "$STATISTICS_CLICKED"
             				}
             			]
             		]
