@@ -7,7 +7,7 @@ fun main(args: Array<String>) {
         LearnWordsTrainer()
     } catch (e: Exception) {
         println("Невозможно загрузить словарь")
-        null
+        return
     }
 
     val dataRegex = "\"data\":\"(.+)\"".toRegex()
@@ -40,7 +40,7 @@ fun main(args: Array<String>) {
         }
         if (data != null) {
             when (data.lowercase()) {
-                LEARN_CLICKED -> {
+                LEARN_WORDS_CLICKED -> {
                     try {
                         telegramService.sendMessage(chatIdString, "Изучение слов")
                     } catch (e: Exception) {
@@ -50,7 +50,7 @@ fun main(args: Array<String>) {
 
                 STATISTICS_CLICKED -> {
                     try {
-                        telegramService.sendMessage(chatIdString, "Выучено 10 из 10 слов | 100%")
+                        telegramService.sendMessage(chatIdString, trainer.getStatisticsString())
                     } catch (e: Exception) {
                         println(e.message)
                     }

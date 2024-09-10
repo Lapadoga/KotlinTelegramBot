@@ -1,2 +1,3 @@
-sadfsd
-sdfdxf
+cat|кошка|4
+dog|собака
+car|машина
