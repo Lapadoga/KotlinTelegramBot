@@ -27,6 +27,12 @@ class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val coun
         return Statistics(total, learned, percent)
     }
 
+    fun getStatisticsString(): String {
+        val statistics = getStatistics()
+
+        return "Выучено ${statistics.learned} из ${statistics.total} слов | ${statistics.percent}%"
+    }
+
     fun getNextQuestion(): Question? {
 
         val listOfUnlearnedWords = dictionary.filter { it.correctAnswersCount < learnedWordsCount }.toMutableList()

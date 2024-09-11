@@ -7,7 +7,7 @@ import java.net.http.HttpResponse
 
 const val HOST = "https://api.telegram.org/"
 const val STATISTICS_CLICKED = "statistics_clicked"
-const val LEARN_CLICKED = "learn_words_clicked"
+const val LEARN_WORDS_CLICKED = "learn_words_clicked"
 
 class TelegramBotService(botToken: String) {
 
@@ -43,7 +43,7 @@ class TelegramBotService(botToken: String) {
             			[
             				{
             					"text": "Изучить слова",
-            					"callback_data": "$LEARN_CLICKED"
+            					"callback_data": "$LEARN_WORDS_CLICKED"
             				}
             			],
             			[
