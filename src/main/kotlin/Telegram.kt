@@ -33,7 +33,8 @@ fun main(args: Array<String>) {
         if (text != null) {
             if (text.equals("/start", ignoreCase = true))
                 try {
-                    telegramService.sendMenu(chatIdString)
+                    val buttonsData = mapOf("Изучение слов" to LEARN_WORDS_CLICKED, "Статистика" to STATISTICS_CLICKED)
+                    telegramService.sendMessage(chatIdString, "Основное меню", buttonsData)
                 } catch (e: Exception) {
                     println(e.message)
                 }
@@ -42,7 +43,7 @@ fun main(args: Array<String>) {
             when (data.lowercase()) {
                 LEARN_WORDS_CLICKED -> {
                     try {
-                        telegramService.sendMessage(chatIdString, "Изучение слов")
+                        telegramService.checkNextQuestionAndSend(trainer, chatIdString)
                     } catch (e: Exception) {
                         println(e.message)
                     }

@@ -8,11 +8,6 @@ data class Statistics(
     val percent: Int,
 )
 
-data class Question(
-    val variants: List<Word>,
-    val correctAnswer: Word,
-)
-
 class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val countOfQuestionWords: Int = 4) {
 
     private val dictionary = loadDictionary(FILE_PATH)
