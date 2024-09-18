@@ -40,8 +40,8 @@ fun main(args: Array<String>) {
                 }
         }
         if (data != null) {
-            when (data.lowercase()) {
-                LEARN_WORDS_CLICKED -> {
+            when {
+                data == LEARN_WORDS_CLICKED -> {
                     try {
                         telegramService.checkNextQuestionAndSend(trainer, chatIdString)
                     } catch (e: Exception) {
@@ -49,12 +49,25 @@ fun main(args: Array<String>) {
                     }
                 }
 
-                STATISTICS_CLICKED -> {
+                data == STATISTICS_CLICKED -> {
                     try {
                         telegramService.sendMessage(chatIdString, trainer.getStatisticsString())
                     } catch (e: Exception) {
                         println(e.message)
                     }
+                }
+
+                data.startsWith(CALLBACK_DATA_ANSWER_PREFIX) -> {
+                    val answerIndex = data.substringAfter('_').toInt()
+                    if (trainer.checkAnswer(answerIndex))
+                        telegramService.sendMessage(chatIdString, "Правильно!")
+                    else {
+                        val currentQuestion = trainer.getCurrentQuestion()
+                        val message =
+                            "Неправильно! ${currentQuestion?.correctAnswer?.original ?: ""} - это ${currentQuestion?.correctAnswer?.translate ?: ""}"
+                        telegramService.sendMessage(chatIdString, message)
+                    }
+                    telegramService.checkNextQuestionAndSend(trainer, chatIdString)
                 }
             }
         }

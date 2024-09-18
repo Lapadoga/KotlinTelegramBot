@@ -61,6 +61,10 @@ class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val coun
         } ?: false
     }
 
+    fun getCurrentQuestion(): Question? {
+        return question
+    }
+
     private fun loadDictionary(path: String): List<Word> {
 
         val file = File(path)
