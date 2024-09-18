@@ -1,5 +1,4 @@
 import java.net.URI
-import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpRequest.BodyPublishers
@@ -8,6 +7,7 @@ import java.net.http.HttpResponse
 const val HOST = "https://api.telegram.org/"
 const val STATISTICS_CLICKED = "statistics_clicked"
 const val LEARN_WORDS_CLICKED = "learn_words_clicked"
+const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 
 class TelegramBotService(botToken: String) {
 
@@ -24,45 +24,30 @@ class TelegramBotService(botToken: String) {
         return response.body()
     }
 
-    fun sendMessage(chatId: String, messageText: String) {
-        val encodedMessage = URLEncoder.encode(messageText, Charsets.UTF_8)
-        val urlSendMessage = "${hostWithToken}sendMessage?chat_id=$chatId&text=$encodedMessage"
-        val client = HttpClient.newBuilder().build()
-        val request = HttpRequest.newBuilder(URI(urlSendMessage)).build()
-        client.send(request, HttpResponse.BodyHandlers.ofString())
-    }
-
-    fun sendMenu(chatId: String) {
+    fun sendMessage(chatId: String, messageText: String, buttonsData: Map<String, String>? = null) {
         val urlSendMessage = "${hostWithToken}sendMessage"
-        val menuBody = """
+        val buttons = if (buttonsData == null) "" else getButtonsString(buttonsData)
+        val requestBody = """
             {
             	"chat_id": $chatId,
-            	"text": "Основное меню",
-            	"reply_markup": {
-            		"inline_keyboard": [
-            			[
-            				{
-            					"text": "Изучить слова",
-            					"callback_data": "$LEARN_WORDS_CLICKED"
-            				}
-            			],
-            			[
-            				{
-            					"text": "Статистика",
-            					"callback_data": "$STATISTICS_CLICKED"
-            				}
-            			]
-            		]
-            	}
+            	"text": "$messageText"$buttons
             }
         """.trimIndent()
 
         val client = HttpClient.newBuilder().build()
         val request = HttpRequest.newBuilder(URI(urlSendMessage))
             .header("Content-type", "application/json")
-            .POST(BodyPublishers.ofString(menuBody))
+            .POST(BodyPublishers.ofString(requestBody))
             .build()
         client.send(request, HttpResponse.BodyHandlers.ofString())
+    }
+
+    fun checkNextQuestionAndSend(trainer: LearnWordsTrainer, chatId: String) {
+        val question = trainer.getNextQuestion()
+        if (question == null)
+            sendMessage(chatId, "Вы выучили все слова в базе")
+        else
+            sendQuestion(chatId, question)
     }
 
     fun parseResponse(regex: Regex, response: String): String? {
@@ -92,10 +77,53 @@ class TelegramBotService(botToken: String) {
             .build()
         client.send(request, HttpResponse.BodyHandlers.ofString())
     }
+
+    private fun sendQuestion(chatId: String, question: Question) {
+        val buttonsData = mutableMapOf<String, String>()
+
+        question.variants.forEachIndexed { index, word ->
+            buttonsData[word.translate] = "$CALLBACK_DATA_ANSWER_PREFIX$index"
+        }
+
+        sendMessage(chatId, question.correctAnswer.original, buttonsData)
+    }
+
+    private fun getButtonsString(buttonsData: Map<String, String>): String {
+        val buttonsList = mutableListOf<String>()
+        buttonsData.forEach { (t, u) ->
+            buttonsList.add(getButtonTemplate(t, u))
+        }
+        val buttonsString = buttonsList.joinToString(",\n")
+        val result = """,
+            "reply_markup": {
+                "inline_keyboard": [
+                    $buttonsString
+                ]
+            }
+        """.trimIndent()
+
+        return result
+    }
+
+    private fun getButtonTemplate(text: String, callbackData: String): String {
+        return """
+            [
+                {
+                    "text": "$text",
+                    "callback_data": "$callbackData"
+                }
+            ]
+        """.trimIndent()
+    }
 }
 
 data class Word(
     val original: String,
     val translate: String,
     var correctAnswersCount: Int = 0,
+)
+
+data class Question(
+    val variants: List<Word>,
+    val correctAnswer: Word,
 )
