@@ -1,8 +1,12 @@
+import kotlinx.serialization.json.Json
+
 fun main(args: Array<String>) {
 
     val botToken = args[0]
-    var updateId = 0
+    var updateId = 0L
     val telegramService = TelegramBotService(botToken)
+    val json = Json { ignoreUnknownKeys = true }
+
     val trainer = try {
         LearnWordsTrainer()
     } catch (e: Exception) {
@@ -10,31 +14,27 @@ fun main(args: Array<String>) {
         return
     }
 
-    val dataRegex = "\"data\":\"(.+)\"".toRegex()
-    val textMessageRegex = "\"text\":\"(.+?)\"".toRegex()
-    val chatIdRegex = "\"chat\":\\{\"id\":(\\d+)".toRegex()
-    val messageIdRegex = "\"update_id\":(\\d+)".toRegex()
-
     telegramService.setCommands()
 
     while (true) {
         Thread.sleep(2000)
-        val updates = telegramService.getUpdates(updateId)
-        println(updates)
+        val responseString = telegramService.getUpdates(updateId)
+        println(responseString)
 
-        val updateIdString = telegramService.parseResponse(messageIdRegex, updates)
-        if (updateIdString != null)
-            updateId = updateIdString.toInt() + 1
+        val response = json.decodeFromString<Response>(responseString)
+        val updates = response.result
+        val firstUpdate = updates.firstOrNull() ?: continue
+        val chatId = firstUpdate.message?.chat?.id ?: firstUpdate.callback?.message?.chat?.id ?: continue
+        val text = firstUpdate.message?.text
+        val data = firstUpdate.callback?.data
 
-        val chatIdString = telegramService.parseResponse(chatIdRegex, updates) ?: continue
-        val text = telegramService.parseResponse(textMessageRegex, updates)
-        val data = telegramService.parseResponse(dataRegex, updates)
+        updateId = firstUpdate.updateId + 1
 
         if (text != null) {
             if (text.equals("/start", ignoreCase = true))
                 try {
                     val buttonsData = mapOf("Изучение слов" to LEARN_WORDS_CLICKED, "Статистика" to STATISTICS_CLICKED)
-                    telegramService.sendMessage(chatIdString, "Основное меню", buttonsData)
+                    telegramService.sendMessage(json, chatId, "Основное меню", buttonsData)
                 } catch (e: Exception) {
                     println(e.message)
                 }
@@ -43,7 +43,7 @@ fun main(args: Array<String>) {
             when {
                 data == LEARN_WORDS_CLICKED -> {
                     try {
-                        telegramService.checkNextQuestionAndSend(trainer, chatIdString)
+                        telegramService.checkNextQuestionAndSend(json, trainer, chatId)
                     } catch (e: Exception) {
                         println(e.message)
                     }
@@ -51,7 +51,7 @@ fun main(args: Array<String>) {
 
                 data == STATISTICS_CLICKED -> {
                     try {
-                        telegramService.sendMessage(chatIdString, trainer.getStatisticsString())
+                        telegramService.sendMessage(json, chatId, trainer.getStatisticsString())
                     } catch (e: Exception) {
                         println(e.message)
                     }
@@ -60,14 +60,14 @@ fun main(args: Array<String>) {
                 data.startsWith(CALLBACK_DATA_ANSWER_PREFIX) -> {
                     val answerIndex = data.substringAfter('_').toInt()
                     if (trainer.checkAnswer(answerIndex))
-                        telegramService.sendMessage(chatIdString, "Правильно!")
+                        telegramService.sendMessage(json, chatId, "Правильно!")
                     else {
                         val currentQuestion = trainer.getCurrentQuestion()
                         val message =
                             "Неправильно! ${currentQuestion?.correctAnswer?.original ?: ""} - это ${currentQuestion?.correctAnswer?.translate ?: ""}"
-                        telegramService.sendMessage(chatIdString, message)
+                        telegramService.sendMessage(json, chatId, message)
                     }
-                    telegramService.checkNextQuestionAndSend(trainer, chatIdString)
+                    telegramService.checkNextQuestionAndSend(json, trainer, chatId)
                 }
             }
         }

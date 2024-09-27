@@ -33,7 +33,7 @@ class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val coun
         val listOfUnlearnedWords = dictionary.filter { it.correctAnswersCount < learnedWordsCount }.toMutableList()
         if (listOfUnlearnedWords.isEmpty()) return null
         if (listOfUnlearnedWords.size < countOfQuestionWords) {
-            val learnedList = dictionary.filter { it.correctAnswersCount >= countOfQuestionWords }.shuffled()
+            val learnedList = dictionary.filter { it.correctAnswersCount >= learnedWordsCount }.shuffled()
             listOfUnlearnedWords += learnedList.take(countOfQuestionWords - listOfUnlearnedWords.size)
         }
 
