@@ -11,6 +11,7 @@ import java.net.http.HttpResponse
 const val HOST = "https://api.telegram.org/"
 const val STATISTICS_CLICKED = "statistics_clicked"
 const val LEARN_WORDS_CLICKED = "learn_words_clicked"
+const val RESET_CLICKED = "reset_progress_clicked"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 
 @Serializable
