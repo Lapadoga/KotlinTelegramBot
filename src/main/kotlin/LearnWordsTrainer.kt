@@ -1,16 +1,18 @@
 import java.io.File
 
-const val FILE_PATH = "words.txt"
-
 data class Statistics(
     val total: Int,
     val learned: Int,
     val percent: Int,
 )
 
-class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val countOfQuestionWords: Int = 4) {
+class LearnWordsTrainer(
+    private val fileName: String = "words.txt",
+    private val learnedWordsCount: Int = 3,
+    private val countOfQuestionWords: Int = 4,
+) {
 
-    private val dictionary = loadDictionary(FILE_PATH)
+    private val dictionary = loadDictionary(fileName)
     private var question: Question? = null
 
     fun getStatistics(): Statistics {
@@ -54,7 +56,7 @@ class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val coun
 
             if (correctAnswerIndex == userAnswerIndex) {
                 it.correctAnswer.correctAnswersCount++
-                saveDictionary(dictionary)
+                saveDictionary()
                 true
             } else
                 false
@@ -65,9 +67,15 @@ class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val coun
         return question
     }
 
+    fun resetProgress() {
+        dictionary.forEach { it.correctAnswersCount = 0 }
+        saveDictionary()
+    }
+
     private fun loadDictionary(path: String): List<Word> {
 
         val file = File(path)
+        if (!file.exists()) File("words.txt").copyTo(file)
         val listOfWords = mutableListOf<Word>()
 
         val fileLines = file.readLines()
@@ -84,12 +92,12 @@ class LearnWordsTrainer(private val learnedWordsCount: Int = 3, private val coun
         return listOfWords
     }
 
-    private fun saveDictionary(listOfWords: List<Word>) {
+    private fun saveDictionary() {
 
-        val file = File(FILE_PATH)
+        val file = File(fileName)
         file.writeText("")
 
-        listOfWords.forEach {
+        dictionary.forEach {
             val stringToWrite = "${it.original}|${it.translate}|${it.correctAnswersCount}\n"
             file.appendText(stringToWrite)
         }
